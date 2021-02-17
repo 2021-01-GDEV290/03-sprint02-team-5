@@ -2,11 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     public float moveSpeed;
+
+    [Header("UI")]
+    public StaminaBar stam;
+
+    [Header("Rifting")]
+    public int riftStamCost;
+    public int maxStam;
+    public int stamRegenAmount;
+    private int stamUpgrades;
     public float riftDistance;
 
+    [Header("Utility")]
     public GameObject riftTrails;
     public Sprite idleSprite;
     
@@ -22,7 +32,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void Awake()
     {
-        rb = this.gameObject.GetComponent<Rigidbody2D>();
+        stam.SetStaminaRegenAmount(stamRegenAmount);
+        stam.SetMaxStamina(maxStam);
+        stam.SetStamina(maxStam);
+        rb = this.gameObject.GetComponent<Rigidbody2D>();        
     }
 
     void Update()
@@ -32,6 +45,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            if (!stam.CheckIfEnoughStamina(riftStamCost)) return;
             archiveMovement = movement;
             waitToMove = true;
             RiftSetup();
@@ -53,6 +67,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void RiftSetup()
     {
+        stam.UseStamina(riftStamCost);
         this.gameObject.GetComponent<SpriteRenderer>().sprite = null;
         riftTrails.SetActive(true);
         Invoke("RiftTrigger", 0.1f);
