@@ -8,12 +8,16 @@ public class PlayerController : MonoBehaviour
 
     [Header("UI")]
     public StaminaBar stam;
+    public HealthBar health;
+
+    [Header("Attacking")]
+    public int maxHealth;
+    public int healthRegenAmount;
 
     [Header("Rifting")]
     public int riftStamCost;
     public int maxStam;
     public int stamRegenAmount;
-    private int stamUpgrades;
     public float riftDistance;
 
     [Header("Utility")]
@@ -21,7 +25,8 @@ public class PlayerController : MonoBehaviour
     public Sprite idleSprite;
     
     bool rifting = false;
-    bool waitToMove = false;
+    bool waitingToMove = false;
+    bool waitingForRespawn = false;
 
 
 
@@ -32,9 +37,12 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        health.SetMaxHealth(maxHealth);
+        health.SetHealthRegenAmount(healthRegenAmount);
+
         stam.SetStaminaRegenAmount(stamRegenAmount);
         stam.SetMaxStamina(maxStam);
-        stam.SetStamina(maxStam);
+
         rb = this.gameObject.GetComponent<Rigidbody2D>();        
     }
 
@@ -45,20 +53,29 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            if (waitingForRespawn) Respawn();
+            if (waitingToMove) return;
             if (!stam.CheckIfEnoughStamina(riftStamCost)) return;
             archiveMovement = movement;
-            waitToMove = true;
+            waitingToMove = true;
             RiftSetup();
         }
+
+        if (Input.GetKeyDown(KeyCode.T)) InflictTestDamage();
+    }
+
+    private void InflictTestDamage()
+    {
+        health.takeDamage(10);
     }
 
     private void FixedUpdate()
-    {        
+    {
         if (rifting)
         {
             Rift();
         }
-        else if (!waitToMove)
+        else if (!waitingToMove)
         {
             if (movement.x != 0 && movement.y != 0) rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime * .7f);
             else rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime);
@@ -88,12 +105,30 @@ public class PlayerController : MonoBehaviour
         else rb.MovePosition(rb.position + archiveMovement * riftDistance);
         
         rifting = false;
-        waitToMove = false;
+        waitingToMove = false;
         Invoke("RiftTrailCleanup", 0.25f);
     }
 
     private void RiftTrailCleanup()
     {
         riftTrails.SetActive(false);
+    }
+
+    public void PlayerDeath()
+    {
+        this.gameObject.GetComponent<SceneTransition>().PlayerDeath();        
+        this.gameObject.GetComponent<SpriteRenderer>().sprite = null;
+        waitingToMove = true;
+        Invoke("RespawnTrigger", 1.7f);
+    }
+
+    private void RespawnTrigger()
+    {
+        waitingForRespawn = true;
+    }
+
+    private void Respawn()
+    {
+        this.gameObject.GetComponent<SceneTransition>().RespawnPlayer();
     }
 }

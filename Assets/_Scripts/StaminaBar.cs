@@ -24,15 +24,10 @@ public class StaminaBar : MonoBehaviour
     public void SetMaxStamina(int newMaxStamina)
     {
         slider.maxValue = newMaxStamina;
+        slider.value = slider.maxValue;
         UpdateStamPercentage();
     }
-
-    public void SetStamina(int newStamina)
-    {
-        slider.value = newStamina;
-        UpdateStamPercentage();
-    }
-
+    
     public void UseStamina(int usedAmount)
     {
         slider.value -= usedAmount;
