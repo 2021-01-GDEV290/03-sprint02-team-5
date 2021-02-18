@@ -8,7 +8,7 @@ public class HealthBar : MonoBehaviour
     public PlayerController player;
     private int counter = 0;
     private int healthRegenAmount;
-    private Slider slider;
+    public Slider slider;
 
     public Text healthPercentage;
 
@@ -28,22 +28,13 @@ public class HealthBar : MonoBehaviour
         slider.value = slider.maxValue;
         UpdateHealthPercentage();
     }
-
     
-
-    public void takeDamage(int damage)
+    public void SetHealth(int newHealth)
     {
-        slider.value -= damage;
+        slider.value = newHealth;
         UpdateHealthPercentage();
-
-        if(slider.value <= 0)
-        {
-            player.PlayerDeath();
-        }
-    }
-
+    }   
     
-
     private void UpdateHealthPercentage()
     {
         healthPercentage.text = (int)((slider.value / slider.maxValue) * 100) + "%";

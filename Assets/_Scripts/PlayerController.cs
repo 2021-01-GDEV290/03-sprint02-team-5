@@ -11,7 +11,11 @@ public class PlayerController : MonoBehaviour
     public HealthBar health;
 
     [Header("Attacking")]
+    public float attackReach;
+    public float attackRadius;    
+    public int attackDamage;
     public int maxHealth;
+    public int currentHealth;
     public int healthRegenAmount;
 
     [Header("Rifting")]
@@ -21,12 +25,15 @@ public class PlayerController : MonoBehaviour
     public float riftDistance;
 
     [Header("Utility")]
+    //public Animator anim;
+    public Transform attackPoint;
+    public LayerMask enemyLayers;
     public GameObject riftTrails;
     public Sprite idleSprite;
     
     bool rifting = false;
     bool waitingToMove = false;
-    bool waitingForRespawn = false;
+    bool waitingToRespawn = false;
 
 
 
@@ -51,12 +58,20 @@ public class PlayerController : MonoBehaviour
         movement.x = Input.GetAxisRaw("Horizontal");
         movement.y = Input.GetAxisRaw("Vertical");
 
+        if (movement.x != 0 || movement.y != 0) archiveMovement = movement;
+
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            if (waitingToRespawn) return;
+            if (waitingToMove) return;            
+            AttackPointSetup();
+        }
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (waitingForRespawn) Respawn();
+            if (waitingToRespawn) Respawn();
             if (waitingToMove) return;
             if (!stam.CheckIfEnoughStamina(riftStamCost)) return;
-            archiveMovement = movement;
             waitingToMove = true;
             RiftSetup();
         }
@@ -66,11 +81,72 @@ public class PlayerController : MonoBehaviour
 
     private void InflictTestDamage()
     {
-        health.takeDamage(10);
+        currentHealth -= 10;
+
+        health.SetHealth(currentHealth);
+        this.gameObject.GetComponent<SpriteRenderer>().color = Color.red;
+
+        if (currentHealth <= 0)
+        {
+            Invoke("PlayerDeath", 0.15f);
+        }
+        else
+        {
+            Invoke("ReturnSpriteColor", 0.15f);
+        }
+    }
+
+    private void ReturnSpriteColor()
+    {
+        this.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
     }
 
     private void FixedUpdate()
     {
+        Vector2 direction = this.gameObject.transform.position - Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        float angle = Mathf.Atan2(direction.x, direction.y) * Mathf.Rad2Deg + 180;
+
+        if ((angle <= 22.5 && angle > 0) || (angle > 337.5 && angle <= 0))  //top
+        {
+            attackPoint.localPosition = new Vector3(0, attackReach * 1, 0);
+        }
+        else if (angle <= 67.5 && angle > 22.5)                              //top - right
+        {
+            attackPoint.localPosition = new Vector3(attackReach * 0.7f, attackReach * 0.7f, 0);
+        }
+        else if (angle <= 112.5 && angle > 67.5)                             //right
+        {
+            attackPoint.localPosition = new Vector3(attackReach * 1, 0, 0);
+        }
+        else if (angle <= 157.5 && angle > 112.5)                            //bottom - right
+        {
+            attackPoint.localPosition = new Vector3(attackReach * 0.7f, attackReach * -1, 0);
+        }
+        else if (angle <= 202.5 && angle > 157.5)                            //bottom
+        {
+            attackPoint.localPosition = new Vector3(0, attackReach * -1.3f, 0);
+        }
+        else if (angle <= 247.5 && angle > 202.5)                            //bottom - left
+        {            
+            attackPoint.localPosition = new Vector3(attackReach * -0.7f, attackReach * -1, 0);
+        }
+        else if (angle <= 292.5 && angle > 247.5)                            //left
+        {
+            attackPoint.localPosition = new Vector3(attackReach * -1, 0, 0);
+        }
+        else if (angle <= 337.5 && angle > 292.5)                            //top - left
+        {
+            attackPoint.localPosition = new Vector3(attackReach * -0.7f, attackReach * 0.7f, 0);
+        }        
+        else                                                            //no direction
+        {
+            attackPoint.localPosition = new Vector3(0, attackReach * 1, 0);
+        }
+
+        Debug.Log(angle);
+        //Debug.DrawLine(this.transform.position, attackPoint.transform.position, Color.red);
+        //Debug.DrawLine(this.transform.position, Input.mousePosition, Color.green);
+
         if (rifting)
         {
             Rift();
@@ -82,6 +158,72 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void AttackPointSetup()
+    {
+            
+     
+        /*
+        if(archiveMovement.x > 0)
+        {
+            if (archiveMovement.y > 0)
+            {
+                attackPoint.localPosition = new Vector3(attackReach*0.7f, attackReach * 0.7f, 0);
+            }
+            else if (archiveMovement.y < 0)
+            {
+                attackPoint.localPosition = new Vector3(attackReach * 0.7f, attackReach * -1, 0);
+            }
+            else if (archiveMovement.y == 0)
+            {
+                attackPoint.localPosition = new Vector3(attackReach * 1, 0, 0);
+            }
+        }
+        else if(archiveMovement.x < 0)
+        {
+            if (archiveMovement.y > 0)
+            {
+                attackPoint.localPosition = new Vector3(attackReach * -0.7f, attackReach * 0.7f, 0);
+            }
+            else if (archiveMovement.y < 0)
+            {
+                attackPoint.localPosition = new Vector3(attackReach * -0.7f, attackReach * -1, 0);
+            }
+            else if (archiveMovement.y == 0)
+            {
+                attackPoint.localPosition = new Vector3(attackReach * -1, 0, 0);
+            }
+        }
+        else if(archiveMovement.x == 0)
+        {
+            if (archiveMovement.y > 0)
+            {
+                attackPoint.localPosition = new Vector3(0, attackReach * 1, 0);
+            }
+            else if (archiveMovement.y < 0)
+            {
+                attackPoint.localPosition = new Vector3(0, attackReach * -1.3f, 0);
+            }
+            else if (archiveMovement.y == 0)
+            {
+                attackPoint.localPosition = new Vector3(0, attackReach * 1, 0);
+            }
+        }
+        */
+        Attack();
+    }
+
+    private void Attack()
+    {
+        //anim.SetTrigger("Attack");
+
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRadius, enemyLayers);
+
+        foreach(Collider2D enemy in hitEnemies)
+        {
+            enemy.gameObject.GetComponent<Enemy>().takeDamage(attackDamage);
+        }
+    }
+    
     private void RiftSetup()
     {
         stam.UseStamina(riftStamCost);
@@ -124,7 +266,7 @@ public class PlayerController : MonoBehaviour
 
     private void RespawnTrigger()
     {
-        waitingForRespawn = true;
+        waitingToRespawn = true;
     }
 
     private void Respawn()
