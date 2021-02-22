@@ -10,9 +10,13 @@ public class EnemyHealthBar : MonoBehaviour
     private Slider _slider;
 
     private void Awake()
-    {
-        _enemy = this.transform.parent.transform.parent.gameObject.GetComponent<Enemy>();
+    {        
         _slider = this.gameObject.GetComponent<Slider>();
+    }
+
+    public void SetParentEnemy(Enemy enemy)
+    {
+        _enemy = enemy;
     }
 
     public void SetMaxHealth(int newMaxHealth)
@@ -32,6 +36,11 @@ public class EnemyHealthBar : MonoBehaviour
     
     private void Update()
     {
-        this.gameObject.transform.position = _enemy.gameObject.transform.position + healthBarOffset;
+        if (_enemy == null)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+        _slider.transform.position = Camera.main.WorldToScreenPoint(_enemy.transform.position + healthBarOffset);
     }
 }

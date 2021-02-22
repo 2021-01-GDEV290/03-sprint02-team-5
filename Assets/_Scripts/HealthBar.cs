@@ -6,11 +6,11 @@ using UnityEngine.UI;
 public class HealthBar : MonoBehaviour
 {
     public PlayerController player;
-    private int counter = 0;
-    private int healthRegenAmount;
+    private int _counter = 0;
+    private int _healthRegenAmount;
     public Slider slider;
 
-    public Text healthPercentage;
+    public Text healthPoints;
 
     private void Awake()
     {
@@ -19,7 +19,7 @@ public class HealthBar : MonoBehaviour
 
     public void SetHealthRegenAmount(int newRegenAmount)
     {
-        healthRegenAmount = newRegenAmount;
+        _healthRegenAmount = newRegenAmount;
     }
 
     public void SetMaxHealth(int newMaxHealth)
@@ -37,18 +37,18 @@ public class HealthBar : MonoBehaviour
     
     private void UpdateHealthPercentage()
     {
-        healthPercentage.text = (int)((slider.value / slider.maxValue) * 100) + "%";
+        healthPoints.text = (int)slider.value + "hp";
     }
 
     private void FixedUpdate()
     {
-        if (slider.maxValue > slider.value) counter++;
+        if (slider.maxValue > slider.value) _counter++;
 
-        if (counter >= 50)
+        if (_counter >= 50)
         {
-            slider.value += healthRegenAmount;
+            slider.value += _healthRegenAmount;
             UpdateHealthPercentage();
-            counter = 0;
+            _counter = 0;
         }
     }
 }

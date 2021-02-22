@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    public GameObject enemyHealthBarPrefab;
+
     [HideInInspector]
     public EnemyHealthBar healthBar;
     public int maxHealth;
@@ -12,7 +14,9 @@ public class Enemy : MonoBehaviour
 
     private void Awake()
     {
-        healthBar = this.transform.GetChild(0).GetChild(0).GetComponent<EnemyHealthBar>();
+        GameObject instance = Instantiate(enemyHealthBarPrefab, GameObject.FindGameObjectWithTag("UI").transform);
+        healthBar = instance.GetComponent<EnemyHealthBar>();
+        healthBar.SetParentEnemy(this);
         _currentHealth = maxHealth;
         _rend = this.gameObject.GetComponent<SpriteRenderer>();
 

@@ -55,6 +55,8 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         health.SetMaxHealth(maxHealth);
+        currentHealth = maxHealth;
+        health.SetHealth(currentHealth);
         health.SetHealthRegenAmount(healthRegenAmount);
 
         stam.SetStaminaRegenAmount(stamRegenAmount);
@@ -154,9 +156,7 @@ public class PlayerController : MonoBehaviour
             attackPoint.localPosition = new Vector3(0, attackReach * 1, 0);
         }
         */
-
-        Debug.Log("Angle Value: " + angle + " degrees");
-
+        
         if (Vector2.Distance(this.gameObject.transform.position, Camera.main.ScreenToWorldPoint(Input.mousePosition)) >= attackReach) attackPoint.localPosition = new Vector3(attackReach * Mathf.Cos(angle), -attackReach * Mathf.Sin(angle), 0);
         else attackPoint.position = new Vector3(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, Camera.main.ScreenToWorldPoint(Input.mousePosition).y, 0);
 
@@ -283,11 +283,12 @@ public class PlayerController : MonoBehaviour
         this.gameObject.GetComponent<SceneTransition>().PlayerDeath();        
         this.gameObject.GetComponent<SpriteRenderer>().sprite = null;
         waitingToMove = true;
-        Invoke("RespawnTrigger", 1.7f);
+        Invoke("RespawnTrigger", 1.5f);
     }
 
     private void RespawnTrigger()
     {
+        Debug.Log("Respawn Trigger");
         waitingToRespawn = true;
     }
 

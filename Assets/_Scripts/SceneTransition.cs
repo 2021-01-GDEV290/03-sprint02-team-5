@@ -21,23 +21,27 @@ public class SceneTransition : MonoBehaviour
 
     private void Awake()
     {        
-        SceneTransition _test = GameObject.FindGameObjectWithTag("Player").GetComponent<SceneTransition>();
-        if (_test != this)
+        GameObject[] _test = GameObject.FindGameObjectsWithTag("Player");
+
+        foreach(GameObject test in _test)
         {
-            Destroy(anim);
-            Destroy(_test.gameObject);
-            Destroy(uiCanvas);
-            Destroy(transitionCanvas);
-            Destroy(cineCam);
+            if (test.GetComponent<SceneTransition>() != this)
+            {
+                SceneTransition purge = test.GetComponent<SceneTransition>();
+                Debug.Log("passed trigger");
+                Destroy(purge.anim);                
+                Destroy(purge.uiCanvas);
+                Destroy(purge.transitionCanvas);
+                Destroy(purge.cineCam);
+                Destroy(test);
+            }
         }
-        else
-        {
-            DontDestroyOnLoad(anim);
-            DontDestroyOnLoad(this.gameObject);
-            DontDestroyOnLoad(uiCanvas);
-            DontDestroyOnLoad(transitionCanvas);
-            DontDestroyOnLoad(cineCam);
-        }
+        DontDestroyOnLoad(anim);
+        DontDestroyOnLoad(this.gameObject);
+        DontDestroyOnLoad(uiCanvas);
+        DontDestroyOnLoad(transitionCanvas);
+        DontDestroyOnLoad(cineCam);
+
         _transitioning = false;
         Debug.Log("SceneTrans: Awake()");
     }
@@ -68,7 +72,8 @@ public class SceneTransition : MonoBehaviour
     }
 
     private void Spawn()
-    {        
+    {
+        cineCam.GetComponent<CinemachineConfig>().LoadScene();
         Transform spawnPos = null;
         if (GameObject.FindGameObjectWithTag("SpawnPoint").transform != null) spawnPos = GameObject.FindGameObjectWithTag("SpawnPoint").transform;
         this.transform.position = spawnPos.position;        
@@ -86,7 +91,7 @@ public class SceneTransition : MonoBehaviour
         respawnText.SetActive(true);
         anim.SetTrigger("fadeIn");
         sceneGroup.alpha = 1;
-        Invoke("SpacebarText", 1.7f);
+        Invoke("SpacebarText", 1.5f);
     }
 
     private void SpacebarText()
