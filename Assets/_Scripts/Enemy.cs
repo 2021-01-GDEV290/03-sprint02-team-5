@@ -4,28 +4,31 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    [HideInInspector]
     public EnemyHealthBar healthBar;
     public int maxHealth;
-    private int currentHealth;
-    private SpriteRenderer rend;
+    private int _currentHealth;
+    private SpriteRenderer _rend;
 
     private void Awake()
     {
-        currentHealth = maxHealth;
-        rend = this.gameObject.GetComponent<SpriteRenderer>();
+        healthBar = this.transform.GetChild(0).GetChild(0).GetComponent<EnemyHealthBar>();
+        _currentHealth = maxHealth;
+        _rend = this.gameObject.GetComponent<SpriteRenderer>();
 
         healthBar.SetMaxHealth(maxHealth);
-        healthBar.SetHealth(maxHealth);
+        healthBar.SetHealth(_currentHealth);
     }
 
     public void takeDamage(int damage)
     {
-        currentHealth -= damage;
-        healthBar.SetHealth(currentHealth);
-        rend.color = Color.red;
+        _currentHealth -= damage;
+        healthBar.SetHealth(_currentHealth);
+        _rend.color = Color.red;
 
-        if (currentHealth <= 0)
-        {            
+        if (_currentHealth <= 0)
+        {
+            healthBar.OnDeath();
             Invoke("NullSprite", 0.15f);
         }
         else
@@ -36,11 +39,11 @@ public class Enemy : MonoBehaviour
 
     private void NullSprite()
     {
-        rend.sprite = null;
+        _rend.sprite = null;
     }
 
     private void ReturnSpriteColor()
     {
-        rend.color = Color.white;
+        _rend.color = Color.white;
     }
 }

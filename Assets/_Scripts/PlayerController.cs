@@ -2,6 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum MovementState
+{
+    idle,
+    right,
+    left,
+    up,
+    down
+}
+
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed;
@@ -25,7 +34,8 @@ public class PlayerController : MonoBehaviour
     public float riftDistance;
 
     [Header("Utility")]
-    //public Animator anim;
+    public MovementState state;
+    public Animator playerAnim;
     public Transform attackPoint;
     public LayerMask enemyLayers;
     public GameObject riftTrails;
@@ -50,7 +60,7 @@ public class PlayerController : MonoBehaviour
         stam.SetStaminaRegenAmount(stamRegenAmount);
         stam.SetMaxStamina(maxStam);
 
-        rb = this.gameObject.GetComponent<Rigidbody2D>();        
+        rb = this.gameObject.GetComponent<Rigidbody2D>();
     }
 
     void Update()
@@ -104,8 +114,9 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         Vector2 direction = this.gameObject.transform.position - Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        float angle = Mathf.Atan2(direction.x, direction.y) * Mathf.Rad2Deg + 180;
+        float angle = Mathf.Atan2(direction.x, direction.y) + 3.14159f/2 ;
 
+        /*
         if ((angle <= 22.5 && angle > 0) || (angle > 337.5 && angle <= 0))  //top
         {
             attackPoint.localPosition = new Vector3(0, attackReach * 1, 0);
@@ -142,10 +153,12 @@ public class PlayerController : MonoBehaviour
         {
             attackPoint.localPosition = new Vector3(0, attackReach * 1, 0);
         }
+        */
 
-        Debug.Log(angle);
-        //Debug.DrawLine(this.transform.position, attackPoint.transform.position, Color.red);
-        //Debug.DrawLine(this.transform.position, Input.mousePosition, Color.green);
+        Debug.Log("Angle Value: " + angle + " degrees");
+
+        if (Vector2.Distance(this.gameObject.transform.position, Camera.main.ScreenToWorldPoint(Input.mousePosition)) >= attackReach) attackPoint.localPosition = new Vector3(attackReach * Mathf.Cos(angle), -attackReach * Mathf.Sin(angle), 0);
+        else attackPoint.position = new Vector3(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, Camera.main.ScreenToWorldPoint(Input.mousePosition).y, 0);
 
         if (rifting)
         {
@@ -156,6 +169,15 @@ public class PlayerController : MonoBehaviour
             if (movement.x != 0 && movement.y != 0) rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime * .7f);
             else rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime);
         }
+
+        playerAnim.SetFloat("moveX", movement.x);
+        playerAnim.SetFloat("moveY", movement.y);
+
+        if (movement.x == 0) playerAnim.SetBool("horizontalMove", false);
+        else playerAnim.SetBool("horizontalMove", true);
+
+        if (movement.y == 0) playerAnim.SetBool("verticalMove", false);
+        else playerAnim.SetBool("verticalMove", true);
     }
 
     private void AttackPointSetup()
