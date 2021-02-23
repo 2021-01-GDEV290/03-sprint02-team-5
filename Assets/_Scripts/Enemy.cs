@@ -62,7 +62,6 @@ public class Enemy : MonoBehaviour
         if(isCooledDown())
         {
             _player.TakeDamage(attackDamage);
-            Debug.Log("Instakill probably");
         }
     }
 
@@ -79,15 +78,10 @@ public class Enemy : MonoBehaviour
 
     private void FixedUpdate()
     {
-        enemyAnim.SetFloat("moveX", _rb.velocity.x);
-        enemyAnim.SetFloat("moveY", _rb.velocity.y);
-        if (_rb.velocity.y == 0)
-        {
-            enemyAnim.SetBool("verticalMove", false);
-            if (_rb.velocity.x == 0) enemyAnim.SetBool("isMoving", false);
-            else enemyAnim.SetBool("isMoving", true);
-        }
-        else enemyAnim.SetBool("verticalMove", true);
+        Vector2 direction = (_player.transform.position - this.transform.position);
+        float angle = (Mathf.Atan2(direction.x, direction.y) * Mathf.Rad2Deg) + 180;
+        
+        enemyAnim.SetInteger("angle", (int)angle);
     }
 
     private void NullSprite()

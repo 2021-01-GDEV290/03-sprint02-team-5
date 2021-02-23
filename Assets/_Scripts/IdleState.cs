@@ -10,7 +10,7 @@ public class IdleState : State
     public override State RunCurrentState()
     {
         Enemy enemy = this.transform.parent.GetComponent<Enemy>();
-        Collider2D player = Physics2D.OverlapCircle(enemy.gameObject.transform.position, enemy.detectionRadius, enemy.attackLayer);
+        Collider2D player = Physics2D.OverlapCircle(enemy.gameObject.transform.position - new Vector3(0, 0.5f, 0), enemy.detectionRadius, enemy.attackLayer);
 
         if (player != null) detectingPlayer = true;
         else detectingPlayer = false;
