@@ -88,12 +88,12 @@ public class PlayerController : MonoBehaviour
             RiftSetup();
         }
 
-        if (Input.GetKeyDown(KeyCode.T)) InflictTestDamage();
+        if (Input.GetKeyDown(KeyCode.T)) TakeDamage(20);
     }
 
-    private void InflictTestDamage()
+    public void TakeDamage(int damage)
     {
-        currentHealth -= 10;
+        currentHealth -= damage;
 
         health.SetHealth(currentHealth);
         this.gameObject.GetComponent<SpriteRenderer>().color = Color.red;
