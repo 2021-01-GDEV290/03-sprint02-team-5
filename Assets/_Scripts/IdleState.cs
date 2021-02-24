@@ -14,10 +14,7 @@ public class IdleState : State
 
         if (player != null) detectingPlayer = true;
         else detectingPlayer = false;
-
-        Debug.Log("Enemy State: Idle");
-
-
+               
         if (detectingPlayer)
         {
             return chase;

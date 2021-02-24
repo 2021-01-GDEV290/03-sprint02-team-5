@@ -24,9 +24,7 @@ public class ChaseState : State
 
         Vector2 direction = (GameObject.FindGameObjectWithTag("Player").transform.position - enemy.gameObject.transform.position);
         enemy.gameObject.transform.Translate(direction * enemy.speed * Time.deltaTime);
-
-        Debug.Log("Enemy State: Chase");
-
+        
         if (playerInRange)
         {
             enemy.enemyAnim.SetBool("isMoving", false);

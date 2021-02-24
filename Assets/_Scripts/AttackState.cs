@@ -17,8 +17,6 @@ public class AttackState : State
 
         Vector2 direction = (GameObject.FindGameObjectWithTag("Player").transform.position - enemy.gameObject.transform.position);
         
-        Debug.Log("Enemy State: Attack");
-
         if(!playerInRange)
         {
             return chase;

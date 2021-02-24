@@ -16,6 +16,7 @@ public class Enemy : MonoBehaviour
     private PlayerController _player;
 
     [Header("Balancing")]
+    public int deathValue;
     public int attackDamage;
     public float attackCooldown;
     private float _cooldownStatus;
@@ -49,7 +50,7 @@ public class Enemy : MonoBehaviour
         if (_currentHealth <= 0)
         {
             healthBar.OnDeath();
-            Invoke("NullSprite", 0.15f);
+            Invoke("EnemyDeath", 0.15f);
         }
         else
         {
@@ -61,12 +62,14 @@ public class Enemy : MonoBehaviour
     {
         if(isCooledDown())
         {
+            Debug.Log("ATTACKED PLAYER");
             _player.TakeDamage(attackDamage);
         }
     }
 
     public bool isCooledDown()
     {
+        Debug.Log("Cooldown: " + _cooldownStatus);
         _cooldownStatus -= Time.deltaTime;
         if (_cooldownStatus <= 0)
         {
@@ -84,9 +87,14 @@ public class Enemy : MonoBehaviour
         enemyAnim.SetInteger("angle", (int)angle);
     }
 
-    private void NullSprite()
+    private void EnemyDeath()
     {
-        //add currency to player
+        Invoke("SelfDestruct", 0.05f);
+        _player.AddCurrency(deathValue);
+    }
+
+    private void SelfDestruct()
+    {
         Destroy(this.gameObject);
     }
 

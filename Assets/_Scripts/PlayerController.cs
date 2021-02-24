@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 using UnityEngine;
 
 public enum MovementState
@@ -18,11 +19,16 @@ public class PlayerController : MonoBehaviour
     [Header("UI")]
     public StaminaBar stam;
     public HealthBar health;
+    public Text moneyText;
 
     [Header("Attacking")]
     public float attackReach;
-    public float attackRadius;    
-    public int attackDamage;
+    public float attackRadius;
+    public int startingAttackDamage;
+    private int _attackDamage;
+
+    [Header("Health")]
+    public int startingMaxHealth;
     public int maxHealth;
     public int currentHealth;
     public int healthRegenAmount;
@@ -30,8 +36,27 @@ public class PlayerController : MonoBehaviour
     [Header("Rifting")]
     public int riftStamCost;
     public int maxStam;
-    public int stamRegenAmount;
     public float riftDistance;
+    public int startingRegenAmount;
+    private int _stamRegenAmount;
+
+    [Header("Upgrade Magnitudes")]
+    public int healthUpgradeMagnitude;
+    public int attackDamageUpgradeMagnitude;
+    public int regenUpgradeMagnitude;
+
+    [HideInInspector]
+    public int healthUpgrade = 0;
+    [HideInInspector]
+    public int attackUpgrade = 0;
+    [HideInInspector]
+    public int regenUpgrade = 0;
+
+    [Header("Upgrade Cost")]
+    public int tier1cost;
+    public int tier2cost;
+    public int tier3cost;
+    private int _money;
 
     [Header("Utility")]
     public MovementState state;
@@ -41,11 +66,10 @@ public class PlayerController : MonoBehaviour
     public GameObject riftTrails;
     public Sprite idleSprite;
     
-    bool rifting = false;
-    bool waitingToMove = false;
+    public bool waitingToMove = false;
+    public bool mouseReadDisabled = false;
     bool waitingToRespawn = false;
-
-
+    bool rifting = false;
 
     [HideInInspector]
     public Rigidbody2D rb;
@@ -54,21 +78,94 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        health.SetMaxHealth(maxHealth);
-        currentHealth = maxHealth;
-        health.SetHealth(currentHealth);
+        RefreshUpgrades();
+
+        health.SetHealth(maxHealth);
         health.SetHealthRegenAmount(healthRegenAmount);
 
-        stam.SetStaminaRegenAmount(stamRegenAmount);
+        stam.SetStaminaRegenAmount(_stamRegenAmount);
         stam.SetMaxStamina(maxStam);
 
         rb = this.gameObject.GetComponent<Rigidbody2D>();
+        _money = 0;
+    }
+
+    public void RefreshUpgrades()
+    {
+        maxHealth = startingMaxHealth + (healthUpgrade * healthUpgradeMagnitude);
+        currentHealth = maxHealth;
+
+        _attackDamage = startingAttackDamage + (attackUpgrade * attackDamageUpgradeMagnitude);
+        _stamRegenAmount = startingRegenAmount + (regenUpgrade * regenUpgradeMagnitude);
+
+        health.SetMaxHealth(maxHealth);
+        stam.SetStaminaRegenAmount(_stamRegenAmount);
+    }
+
+    public void UpgradeHealth()
+    {
+        if (healthUpgrade == 2)
+        {
+            _money -= tier3cost;
+        }
+        else if (healthUpgrade == 1)
+        {
+            _money -= tier2cost;
+        }
+        else if (healthUpgrade == 0)
+        {
+            _money -= tier1cost;
+        }
+        else return;
+
+        AddCurrency(0);
+        healthUpgrade++;
+    }
+
+    public void UpgradeAttack()
+    {
+        if (attackUpgrade == 2)
+        {
+            _money -= tier3cost;
+        }
+        else if (attackUpgrade == 1)
+        {
+            _money -= tier2cost;
+        }
+        else if (attackUpgrade == 0)
+        {
+            _money -= tier1cost;
+        }
+        else return;
+
+        AddCurrency(0);
+        attackUpgrade++;
+    }
+
+    public void UpgradeRegen()
+    {
+        if (regenUpgrade == 2)
+        {
+            _money -= tier3cost;
+        }
+        else if (regenUpgrade == 1)
+        {
+            _money -= tier2cost;
+        }
+        else if (regenUpgrade == 0)
+        {
+            _money -= tier1cost;
+        }
+        else return;
+
+        AddCurrency(0);
+        regenUpgrade++;
     }
 
     void Update()
     {
-        movement.x = Input.GetAxisRaw("Horizontal");
-        movement.y = Input.GetAxisRaw("Vertical");
+        if(!waitingToMove) movement.x = Input.GetAxisRaw("Horizontal");
+        if(!waitingToMove) movement.y = Input.GetAxisRaw("Vertical");
 
         if (movement.x != 0 || movement.y != 0) archiveMovement = movement;
 
@@ -76,14 +173,18 @@ public class PlayerController : MonoBehaviour
         {
             if (waitingToRespawn) return;
             if (waitingToMove) return;            
-            AttackPointSetup();
+            Attack();
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            Debug.Log("trigger 1");
             if (waitingToRespawn) Respawn();
+            Debug.Log("trigger 2");
             if (waitingToMove) return;
+            Debug.Log("trigger 3");
             if (!stam.CheckIfEnoughStamina(riftStamCost)) return;
+            Debug.Log("trigger 4");
             waitingToMove = true;
             RiftSetup();
         }
@@ -108,10 +209,34 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public bool CanAfford(int tier)
+    {
+        if(tier == 3)
+        {
+            if (_money >= tier3cost) return true;
+            else return false;
+        }
+        else if(tier == 2)
+        {
+            if (_money >= tier2cost) return true;
+            else return false;
+        }
+        else if (tier == 1)
+        {
+            if (_money >= tier1cost) return true;
+            else return false;
+        }
+        else
+        {
+            Debug.Log("Player: CanAfford: Unknown Tier: " + tier);
+            return false;
+        }
+    }
+
     private void ReturnSpriteColor()
     {
         this.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-    }
+    }        
 
     private void FixedUpdate()
     {
@@ -156,9 +281,12 @@ public class PlayerController : MonoBehaviour
             attackPoint.localPosition = new Vector3(0, attackReach * 1, 0);
         }
         */
-        
-        if (Vector2.Distance(this.gameObject.transform.position, Camera.main.ScreenToWorldPoint(Input.mousePosition)) >= attackReach) attackPoint.localPosition = new Vector3(attackReach * Mathf.Cos(angle), -attackReach * Mathf.Sin(angle), 0);
-        else attackPoint.position = new Vector3(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, Camera.main.ScreenToWorldPoint(Input.mousePosition).y, 0);
+
+        if (!mouseReadDisabled)
+        {
+            if (Vector2.Distance(this.gameObject.transform.position, Camera.main.ScreenToWorldPoint(Input.mousePosition)) >= attackReach) attackPoint.localPosition = new Vector3(attackReach * Mathf.Cos(angle), -attackReach * Mathf.Sin(angle), 0);
+            else attackPoint.position = new Vector3(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, Camera.main.ScreenToWorldPoint(Input.mousePosition).y, 0);
+        }
 
         if (rifting)
         {
@@ -179,61 +307,7 @@ public class PlayerController : MonoBehaviour
         if (movement.y == 0) playerAnim.SetBool("verticalMove", false);
         else playerAnim.SetBool("verticalMove", true);
     }
-
-    private void AttackPointSetup()
-    {
-            
-     
-        /*
-        if(archiveMovement.x > 0)
-        {
-            if (archiveMovement.y > 0)
-            {
-                attackPoint.localPosition = new Vector3(attackReach*0.7f, attackReach * 0.7f, 0);
-            }
-            else if (archiveMovement.y < 0)
-            {
-                attackPoint.localPosition = new Vector3(attackReach * 0.7f, attackReach * -1, 0);
-            }
-            else if (archiveMovement.y == 0)
-            {
-                attackPoint.localPosition = new Vector3(attackReach * 1, 0, 0);
-            }
-        }
-        else if(archiveMovement.x < 0)
-        {
-            if (archiveMovement.y > 0)
-            {
-                attackPoint.localPosition = new Vector3(attackReach * -0.7f, attackReach * 0.7f, 0);
-            }
-            else if (archiveMovement.y < 0)
-            {
-                attackPoint.localPosition = new Vector3(attackReach * -0.7f, attackReach * -1, 0);
-            }
-            else if (archiveMovement.y == 0)
-            {
-                attackPoint.localPosition = new Vector3(attackReach * -1, 0, 0);
-            }
-        }
-        else if(archiveMovement.x == 0)
-        {
-            if (archiveMovement.y > 0)
-            {
-                attackPoint.localPosition = new Vector3(0, attackReach * 1, 0);
-            }
-            else if (archiveMovement.y < 0)
-            {
-                attackPoint.localPosition = new Vector3(0, attackReach * -1.3f, 0);
-            }
-            else if (archiveMovement.y == 0)
-            {
-                attackPoint.localPosition = new Vector3(0, attackReach * 1, 0);
-            }
-        }
-        */
-        Attack();
-    }
-
+    
     private void Attack()
     {
         //anim.SetTrigger("Attack");
@@ -242,7 +316,7 @@ public class PlayerController : MonoBehaviour
 
         foreach(Collider2D enemy in hitEnemies)
         {
-            enemy.gameObject.GetComponent<Enemy>().takeDamage(attackDamage);
+            enemy.gameObject.GetComponent<Enemy>().takeDamage(_attackDamage);
         }
     }
     
@@ -286,6 +360,16 @@ public class PlayerController : MonoBehaviour
         Invoke("RespawnTrigger", 1.5f);
     }
 
+    public void AddCurrency(int newMoney)
+    {
+        _money += newMoney;
+
+        if(_money < 10) moneyText.text = "000" + _money;
+        else if(_money < 100) moneyText.text = "00" + _money;
+        else if (_money < 1000) moneyText.text = "0" + _money;
+        else moneyText.text = "" + _money;
+    }
+
     private void RespawnTrigger()
     {
         Debug.Log("Respawn Trigger");
@@ -295,5 +379,15 @@ public class PlayerController : MonoBehaviour
     private void Respawn()
     {
         this.gameObject.GetComponent<SceneTransition>().RespawnPlayer();
+    }
+
+    public void SetWaitingToMove(bool log)
+    {
+        waitingToMove = log;
+    }
+
+    public void SetMouseReadLock(bool log)
+    {
+        mouseReadDisabled = log;
     }
 }
