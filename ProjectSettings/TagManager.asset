@@ -5,7 +5,6 @@ TagManager:
   serializedVersion: 2
   tags:
   - SpawnPoint
-  - Bounds
   - Transition
   - UI
   - GreenKey
@@ -13,6 +12,8 @@ TagManager:
   - PurpleKey
   - Bounds_main
   - Bounds_zone1
+  - SpawnPoint_main
+  - SpawnPoint_zone1
   layers:
   - Default
   - TransparentFX

@@ -54,14 +54,16 @@ public class SceneTransition : MonoBehaviour
 
             if (collision.gameObject.name == "zone1_transition")
             {                
-                Invoke("ZoneOne", 1.4f);                
+                Invoke("ZoneOne", 1.4f);
+                Invoke("SpawnZoneOne", 1.5f);
             }
             if(collision.gameObject.name == "mainRoom_transition")
             {
                 Invoke("MainRoom", 1.4f);
+                Invoke("SpawnMain", 1.5f);
             }
 
-            Invoke("Spawn", 1.5f);
+            
             Invoke("RevealScene", 1.6f);
         }
 
@@ -90,7 +92,8 @@ public class SceneTransition : MonoBehaviour
 
     private void MainRoom()
     {
-        SceneManager.LoadSceneAsync("scene_mainRoom",LoadSceneMode.Additive);
+        SceneManager.MoveGameObjectToScene(this.gameObject, SceneManager.GetSceneByName("scene_mainRoom"));
+        SceneManager.SetActiveScene(SceneManager.GetSceneByName("scene_mainRoom"));
         Invoke("ConfigMainRoomCam", .5f);
     }
 
@@ -104,12 +107,18 @@ public class SceneTransition : MonoBehaviour
         cineCam.GetComponent<CinemachineConfig>().LoadScene("mainRoom");
     }
 
-    private void Spawn()
+    private void SpawnMain()
     {        
         Transform spawnPos = null;
-        if (GameObject.FindGameObjectWithTag("SpawnPoint").transform != null) spawnPos = GameObject.FindGameObjectWithTag("SpawnPoint").transform;
+        if (GameObject.FindGameObjectWithTag("SpawnPoint_main").transform != null) spawnPos = GameObject.FindGameObjectWithTag("SpawnPoint_main").transform;
+        this.transform.position = spawnPos.position;        
+    }
+
+    private void SpawnZoneOne()
+    {
+        Transform spawnPos = null;
+        if (GameObject.FindGameObjectWithTag("SpawnPoint_zone1").transform != null) spawnPos = GameObject.FindGameObjectWithTag("SpawnPoint_zone1").transform;
         this.transform.position = spawnPos.position;
-        
     }
 
     private void RevealScene()

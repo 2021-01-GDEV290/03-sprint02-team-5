@@ -4,9 +4,13 @@ using UnityEngine;
 
 public class Door : MonoBehaviour
 {
+    public string keyColor;
+
+    [Header("Util")]
     public LayerMask scanLayer;
     public float scanRadius;
 
+    [Header("UI")]
     public GameObject getKeyPrompt;
     public GameObject interactPrompt;
 
@@ -23,7 +27,7 @@ public class Door : MonoBehaviour
 
         if (playerScan != null)
         {
-            if (CheckKey("Green"))
+            if (CheckKey(keyColor))
             {
                 interactPrompt.SetActive(true);
                 if (Input.GetKeyDown(KeyCode.F))

@@ -603,7 +603,7 @@ GameObject:
   - component: {fileID: 1625270782}
   m_Layer: 0
   m_Name: SpawnPoint
-  m_TagString: SpawnPoint
+  m_TagString: SpawnPoint_zone1
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
