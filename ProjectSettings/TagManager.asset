@@ -11,6 +11,8 @@ TagManager:
   - GreenKey
   - BlueKey
   - PurpleKey
+  - Bounds_main
+  - Bounds_zone1
   layers:
   - Default
   - TransparentFX

@@ -14,6 +14,7 @@ public class Enemy : MonoBehaviour
     private Rigidbody2D _rb;
     private SpriteRenderer _rend;
     private PlayerController _player;
+    private Color _tint;
 
     [Header("Balancing")]
     public int deathValue;
@@ -36,6 +37,7 @@ public class Enemy : MonoBehaviour
         _rend = this.gameObject.GetComponent<SpriteRenderer>();
         _rb = this.gameObject.GetComponent<Rigidbody2D>();
         _player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
+        _tint = _rend.color;
 
         healthBar.SetMaxHealth(maxHealth);
         healthBar.SetHealth(_currentHealth);
@@ -100,6 +102,6 @@ public class Enemy : MonoBehaviour
 
     private void ReturnSpriteColor()
     {
-        _rend.color = Color.white;
+        _rend.color = _tint;
     }
 }

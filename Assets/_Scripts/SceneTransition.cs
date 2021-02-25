@@ -28,7 +28,6 @@ public class SceneTransition : MonoBehaviour
             if (test.GetComponent<SceneTransition>() != this)
             {
                 SceneTransition purge = test.GetComponent<SceneTransition>();
-                Debug.Log("passed trigger");
                 Destroy(purge.anim);                
                 Destroy(purge.uiCanvas);
                 Destroy(purge.transitionCanvas);
@@ -43,7 +42,6 @@ public class SceneTransition : MonoBehaviour
         DontDestroyOnLoad(cineCam);
 
         _transitioning = false;
-        Debug.Log("SceneTrans: Awake()");
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -57,6 +55,10 @@ public class SceneTransition : MonoBehaviour
             if (collision.gameObject.name == "zone1_transition")
             {                
                 Invoke("ZoneOne", 1.4f);                
+            }
+            if(collision.gameObject.name == "mainRoom_transition")
+            {
+                Invoke("MainRoom", 1.4f);
             }
 
             Invoke("Spawn", 1.5f);
@@ -82,17 +84,32 @@ public class SceneTransition : MonoBehaviour
 
     private void ZoneOne()
     {
-        SceneManager.LoadScene("prototyping_scene0");   
-        Debug.Log("SceneTrans: SceneLoad()");
+        SceneManager.LoadSceneAsync("scene_zone1", LoadSceneMode.Additive);
+        Invoke("ConfigZone1Cam", .5f);
+    }
+
+    private void MainRoom()
+    {
+        SceneManager.LoadSceneAsync("scene_mainRoom",LoadSceneMode.Additive);
+        Invoke("ConfigMainRoomCam", .5f);
+    }
+
+    private void ConfigZone1Cam()
+    {
+        cineCam.GetComponent<CinemachineConfig>().LoadScene("zone1");
+    }
+
+    private void ConfigMainRoomCam()
+    {
+        cineCam.GetComponent<CinemachineConfig>().LoadScene("mainRoom");
     }
 
     private void Spawn()
-    {
-        cineCam.GetComponent<CinemachineConfig>().LoadScene();
+    {        
         Transform spawnPos = null;
         if (GameObject.FindGameObjectWithTag("SpawnPoint").transform != null) spawnPos = GameObject.FindGameObjectWithTag("SpawnPoint").transform;
-        this.transform.position = spawnPos.position;        
-        Debug.Log("SceneTrans: Spawn/Fade Out Black()");
+        this.transform.position = spawnPos.position;
+        
     }
 
     private void RevealScene()
@@ -116,12 +133,6 @@ public class SceneTransition : MonoBehaviour
 
     public void RespawnPlayer()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        Invoke("ConfigCamera", 0.1f);
-    }
-
-    private void ConfigCamera()
-    {
-        cineCam.GetComponent<CinemachineConfig>().LoadScene();
+        SceneManager.LoadScene(0);
     }
 }

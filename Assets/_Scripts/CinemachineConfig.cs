@@ -23,12 +23,14 @@ public class CinemachineConfig : MonoBehaviour
     void Start()
     {
         _camera.Follow = player;
-        _bounds.m_BoundingShape2D = GameObject.FindGameObjectWithTag("Bounds").GetComponent<PolygonCollider2D>();
+        _bounds.m_BoundingShape2D = GameObject.FindGameObjectWithTag("Bounds_main").GetComponent<PolygonCollider2D>();
     }    
 
-    public void LoadScene()
+    public void LoadScene(string scene)
     {
         _camera.Follow = player;
-        _bounds.m_BoundingShape2D = GameObject.FindGameObjectWithTag("Bounds").GetComponent<PolygonCollider2D>();
+
+        if(scene == "mainRoom") _bounds.m_BoundingShape2D = GameObject.FindGameObjectWithTag("Bounds_main").GetComponent<PolygonCollider2D>();
+        if (scene == "zone1") _bounds.m_BoundingShape2D = GameObject.FindGameObjectWithTag("Bounds_zone1").GetComponent<PolygonCollider2D>();
     }
 }
