@@ -9,8 +9,9 @@ public class Shop : MonoBehaviour
 
     public GameObject interactPrompt;
     public GameObject upgradeMenu;
+    public Canvas sceneCrossfade;
 
-    void FixedUpdate()
+    void Update()
     {
         Collider2D playerScan = Physics2D.OverlapCircle(this.gameObject.transform.position - new Vector3(0, 0.5f, 0), scanRadius, scanLayer);
 
@@ -22,6 +23,7 @@ public class Shop : MonoBehaviour
                 playerScan.gameObject.GetComponent<PlayerController>().waitingToMove = true;
                 playerScan.gameObject.GetComponent<PlayerController>().mouseReadDisabled = true;
 
+                sceneCrossfade.enabled = false;
                 interactPrompt.SetActive(false);
                 upgradeMenu.SetActive(true);
                 upgradeMenu.GetComponent<TierManager>().RefreshTiers();

@@ -8,6 +8,9 @@ TagManager:
   - Bounds
   - Transition
   - UI
+  - GreenKey
+  - BlueKey
+  - PurpleKey
   layers:
   - Default
   - TransparentFX

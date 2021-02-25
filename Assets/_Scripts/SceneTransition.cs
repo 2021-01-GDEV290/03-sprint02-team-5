@@ -62,7 +62,22 @@ public class SceneTransition : MonoBehaviour
             Invoke("Spawn", 1.5f);
             Invoke("RevealScene", 1.6f);
         }
-        
+
+        if(collision.gameObject.tag == "GreenKey")
+        {
+            this.gameObject.GetComponent<PlayerController>().GrabGreenKey();
+            Destroy(collision.gameObject);
+        }
+        if(collision.gameObject.tag == "BlueKey")
+        {
+            this.gameObject.GetComponent<PlayerController>().GrabBlueKey();
+            Destroy(collision.gameObject);
+        }
+        if(collision.gameObject.tag == "PurpleKey")
+        {
+            this.gameObject.GetComponent<PlayerController>().GrabPurpleKey();
+            Destroy(collision.gameObject);
+        }        
     }
 
     private void ZoneOne()
@@ -102,5 +117,11 @@ public class SceneTransition : MonoBehaviour
     public void RespawnPlayer()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        Invoke("ConfigCamera", 0.1f);
+    }
+
+    private void ConfigCamera()
+    {
+        cineCam.GetComponent<CinemachineConfig>().LoadScene();
     }
 }

@@ -58,6 +58,11 @@ public class PlayerController : MonoBehaviour
     public int tier3cost;
     private int _money;
 
+    //KEYS
+    private bool _greenKey = false;
+    private bool _blueKey = false;
+    private bool _purpleKey = false;
+
     [Header("Utility")]
     public MovementState state;
     public Animator playerAnim;
@@ -65,6 +70,7 @@ public class PlayerController : MonoBehaviour
     public LayerMask enemyLayers;
     public GameObject riftTrails;
     public Sprite idleSprite;
+    private int _counter = 0;
     
     public bool waitingToMove = false;
     public bool mouseReadDisabled = false;
@@ -81,13 +87,39 @@ public class PlayerController : MonoBehaviour
         RefreshUpgrades();
 
         health.SetHealth(maxHealth);
-        health.SetHealthRegenAmount(healthRegenAmount);
 
         stam.SetStaminaRegenAmount(_stamRegenAmount);
         stam.SetMaxStamina(maxStam);
 
         rb = this.gameObject.GetComponent<Rigidbody2D>();
         _money = 0;
+    }
+
+    public void GrabGreenKey()
+    {
+        _greenKey = true;
+    }
+    public bool hasGreenKey()
+    {
+        return _greenKey;
+    }
+
+    public void GrabBlueKey()
+    {
+        _blueKey = true;
+    }
+    public bool hasBlueKey()
+    {
+        return _blueKey;
+    }
+
+    public void GrabPurpleKey()
+    {
+        _purpleKey = true;
+    }
+    public bool hasPurpleKey()
+    {
+        return _purpleKey;
     }
 
     public void RefreshUpgrades()
@@ -282,6 +314,15 @@ public class PlayerController : MonoBehaviour
         }
         */
 
+        if (maxHealth > currentHealth) _counter++;
+
+        if (_counter >= 50)
+        {
+            currentHealth += healthRegenAmount;
+            health.SetHealth(currentHealth);
+            _counter = 0;
+        }
+
         if (!mouseReadDisabled)
         {
             if (Vector2.Distance(this.gameObject.transform.position, Camera.main.ScreenToWorldPoint(Input.mousePosition)) >= attackReach) attackPoint.localPosition = new Vector3(attackReach * Mathf.Cos(angle), -attackReach * Mathf.Sin(angle), 0);
@@ -377,7 +418,7 @@ public class PlayerController : MonoBehaviour
     }
 
     private void Respawn()
-    {
+    {        
         this.gameObject.GetComponent<SceneTransition>().RespawnPlayer();
     }
 

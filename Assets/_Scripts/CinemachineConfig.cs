@@ -10,6 +10,8 @@ public class CinemachineConfig : MonoBehaviour
     private CinemachineVirtualCamera _camera;
     private CinemachineConfiner _bounds;
 
+    public Transform player;
+
     private void Awake()
     {
         _CMvcam1 = this.gameObject;
@@ -20,17 +22,13 @@ public class CinemachineConfig : MonoBehaviour
 
     void Start()
     {
-        _camera.Follow = GameObject.FindGameObjectWithTag("Player").transform;
+        _camera.Follow = player;
         _bounds.m_BoundingShape2D = GameObject.FindGameObjectWithTag("Bounds").GetComponent<PolygonCollider2D>();
     }    
 
     public void LoadScene()
     {
-        _CMvcam1 = this.gameObject;
-        _camera = _CMvcam1.GetComponent<CinemachineVirtualCamera>();
-        _bounds = _CMvcam1.GetComponent<CinemachineConfiner>();
-
-        _camera.Follow = GameObject.FindGameObjectWithTag("Player").transform;
+        _camera.Follow = player;
         _bounds.m_BoundingShape2D = GameObject.FindGameObjectWithTag("Bounds").GetComponent<PolygonCollider2D>();
     }
 }
